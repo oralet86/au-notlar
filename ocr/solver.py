@@ -4,21 +4,29 @@ from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 from PIL import Image
 
 class ModelSingleton:
-    _instance = None
+    _processor = None
+    _model = None
 
-    def __init__(self):
-        if ModelSingleton._instance is None:
-            ModelSingleton._instance = dict()
-            ModelSingleton._instance["processor"] = TrOCRProcessor.from_pretrained("microsoft/trocr-large-printed")
-            ModelSingleton._instance["model"] = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-large-printed")
+    @classmethod
+    def get_processor(cls):
+        if cls._processor is None:
+            cls._processor = TrOCRProcessor.from_pretrained("microsoft/trocr-large-printed")
+        return cls._processor
+
+    @classmethod
+    def get_model(cls):
+        if cls._model is None:
+            cls._model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-large-printed")
+        return cls._model
+
 
 class CaptchaSolver:
     def __init__(self, image_path):
         ModelSingleton()
         self.image = cv2.imread(image_path)
         self.kernel = np.ones((2, 2), np.uint8)
-        self.processor = ModelSingleton._instance["processor"]
-        self.model = ModelSingleton._instance["model"]
+        self.processor = ModelSingleton.get_processor()
+        self.model = ModelSingleton.get_model()
 
     def enhance_legibility(self, cropped_image):
         gray = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
@@ -32,12 +40,19 @@ class CaptchaSolver:
 
         # Generate text
         output = self.model.generate(pixel_values)
-        return int("".join(ch for ch in self.processor.batch_decode(output, skip_special_tokens=True)[0].strip() if ch.isdigit()))
+        decoded = self.processor.batch_decode(output, skip_special_tokens=True)[0].strip() 
+        try:
+            result = int("".join(ch for ch in decoded if ch.isdigit()))
+        except ValueError:
+            # print(decoded)
+            result = -1
+        finally:
+            return result
 
     def resolve(self, left_image, right_image):
         left_number = self.process_image(left_image)
         right_number = self.process_image(right_image)
-        return {"left": left_number, "right": right_number, "sum": left_number + right_number}
+        return {"left": left_number, "right": right_number, "sum": ((left_number + right_number) if (left_number > 0 and right_number > 0) else "Error")}
 
     def solve_captcha(self):
         positions = {'left': 5, 'right': 45}
@@ -52,6 +67,6 @@ class CaptchaSolver:
         return self.resolve(left_enhanced, right_enhanced)
 
 if __name__ == "__main__":
-    solver = CaptchaSolver("ocr/testimages/captcha10.png")
+    solver = CaptchaSolver("ocr/testimages/captcha4.png")
     result = solver.solve_captcha()
     print(result)
