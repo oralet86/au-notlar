@@ -25,9 +25,9 @@ class CaptchaSolver:
         _, mask = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
         return cv2.erode(cv2.blur(mask, (2, 2)), self.kernel, iterations=1)
 
-    def process_image(self, image_path):
-        # Open image and preprocess
-        image = Image.open(image_path).convert("RGB")
+    def process_image(self, image_data):
+        # Turn ndarray into an image object and preprocess
+        image = Image.fromarray(image_data).convert("RGB")
         pixel_values = self.processor(images=image, return_tensors="pt").pixel_values
 
         # Generate text
@@ -37,7 +37,7 @@ class CaptchaSolver:
     def resolve(self, left_image, right_image):
         left_number = self.process_image(left_image)
         right_number = self.process_image(right_image)
-        return {"left": left_number, "right": right_number, "sum": left_number+right_number}
+        return {"left": left_number, "right": right_number, "sum": left_number + right_number}
 
     def solve_captcha(self):
         positions = {'left': 5, 'right': 45}
@@ -49,10 +49,7 @@ class CaptchaSolver:
         left_enhanced = self.enhance_legibility(left_image)
         right_enhanced = self.enhance_legibility(right_image)
 
-        cv2.imwrite('left_number.png', left_enhanced)
-        cv2.imwrite('right_number.png', right_enhanced)
-
-        return self.resolve('left_number.png', 'right_number.png')
+        return self.resolve(left_enhanced, right_enhanced)
 
 if __name__ == "__main__":
     solver = CaptchaSolver("ocr/testimages/captcha10.png")
