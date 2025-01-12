@@ -9,12 +9,27 @@ class ScraperManager:
 
 class OBSScraper:
     browser: webdriver.Firefox = None
-    state = "init"
+    state: str = "init"
 
     def __init__(self):
         browser = webdriver.Firefox()
         browser.get(OBS_LOGIN_URL)
         self.browser = browser
+
+    def getGrades(self):
+        self.determineState()
+        while True:
+            match self.state:
+                case "init":
+                    ...
+                case "mainmenu":
+                    ...
+                case "examresults":
+                    ...
+                case "other":
+                    ...
+
+    def determineState(self): ...
 
     def getLoginElements(self):
         username_input = self.browser.find_element("css selector", "#OtherUsername")
@@ -33,7 +48,10 @@ class OBSScraper:
             "login": login_button,
         }
 
-    browser.quit()
+    def quit(self):
+        self.browser.quit()
+        self.browser = None
+        self.state = "init"
 
 
 if __name__ == "__main__":
