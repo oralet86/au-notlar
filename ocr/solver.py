@@ -40,8 +40,13 @@ class CaptchaSolver:
     use object.solve_captcha() to get the result.
     """
 
-    def __init__(self, image_path):
-        self.image = cv2.imread(image_path)
+    def __init__(self, image):
+        if isinstance(image, str):
+            self.image = cv2.imread(image)
+        elif isinstance(image, np.ndarray):
+            self.image = image
+        else:
+            raise TypeError("Argument image must either be str or np.ndarray")
         self.kernel = np.ones((2, 2), np.uint8)
         self.processor = ModelSingleton.get_processor()
         self.model = ModelSingleton.get_model()
