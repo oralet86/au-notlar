@@ -24,7 +24,6 @@ class ModelSingleton:
 
 class CaptchaSolver:
   def __init__(self, image_path):
-    ModelSingleton()
     self.image = cv2.imread(image_path)
     self.kernel = np.ones((2, 2), np.uint8)
     self.processor = ModelSingleton.get_processor()
