@@ -7,6 +7,12 @@ from datetime import datetime
 
 
 class ModelSingleton:
+    """
+    A singleton pair of a model and a processor.
+    Use get_processor() to get the instantiated processor,
+    Use get_model() to get the instantiated model.
+    """
+
     _processor = None
     _model = None
 
@@ -28,6 +34,12 @@ class ModelSingleton:
 
 
 class CaptchaSolver:
+    """
+    A class to solve equation Captchas.
+    Create an object of this class with either the equation image path as input or the image data as an np.ndarray.
+    use object.solve_captcha() to get the result.
+    """
+
     def __init__(self, image_path):
         self.image = cv2.imread(image_path)
         self.kernel = np.ones((2, 2), np.uint8)
