@@ -61,21 +61,18 @@ class CaptchaSolver:
     print(f"saving {name}")
     cv2.imwrite(f"ocr/trainingdata/{name}", image)
 
-  def solve_captcha(self, save=False):
+  def solve_captcha(self, save=False) -> int | None:
     """
-  Solves the CAPTCHA and returns a dictionary containing the numbers on the left
-  and right side of the equation, along with the calculated result.
+    Solves the CAPTCHA and returns a dictionary containing the numbers on the left
+    and right side of the equation, along with the calculated result.
 
-  Args:
-    save (bool, optional): If True, saves the enhanced images of the left and
-                 right numbers for use as training data. Defaults to False.
+    Args:
+        save (bool, optional): If True, saves the enhanced images of the left and
+        right numbers for use as training data. Defaults to False.
 
-  Returns:
-    dict: A dictionary with the following keys:
-      - "left" (int): The number extracted from the left side of the equation.
-      - "right" (int): The number extracted from the right side of the equation.
-      - "sum" (int): The result of the equation based on the extracted numbers.
-  """
+    Returns:
+        int | None: The result of the equation, if found, will be returned. If not, None will be returned. 
+    """
     positions = {'left': 5, 'right': 45}
     dimensions = {'width': 25}
 
@@ -92,7 +89,7 @@ class CaptchaSolver:
       self.save_training_data(left_enhanced, result["left"])
       self.save_training_data(right_enhanced, result["right"])
 
-    return result
+    return result["sum"] if type(result["sum"]) is int else None
 
 if __name__ == "__main__":
   solver = CaptchaSolver("ocr/testimages/captcha4.png")
