@@ -1,4 +1,5 @@
 from selenium import webdriver
+from typing import Literal
 
 OBS_LOGIN_URL = "https://obs.ankara.edu.tr/Account/Login"
 
@@ -9,7 +10,7 @@ class ScraperManager:
 
 class OBSScraper:
     browser: webdriver.Firefox = None
-    state: str = "init"
+    state: Literal["init", "mainmenu", "form", "examresults", "other"] = "init"
 
     def __init__(self):
         self.start()
@@ -29,7 +30,30 @@ class OBSScraper:
                     self.start()
                     break
 
-    def determineState(self): ...
+    def determineState(self):
+        if self.isInLogin():
+            self.state = "init"
+        elif self.isInForm():
+            self.state = "form"
+        elif self.isInMainmenu():
+            self.state = "mainmenu"
+        elif self.isInExamResults():
+            self.state = "examresults"
+        else:
+            self.state = "other"
+
+    def isInLogin(self):
+        try:
+            self.browser.find_element("css selector", "#recover")
+            return True
+        except Exception:
+            return False
+
+    def isInForm(self): ...
+
+    def isInMainmenu(self): ...
+
+    def isInExamResults(self): ...
 
     def getLoginElements(self):
         username_input = self.browser.find_element("css selector", "#OtherUsername")
