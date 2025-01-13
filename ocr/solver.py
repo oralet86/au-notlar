@@ -40,7 +40,7 @@ class CaptchaSolver:
     use object.solve_captcha() to get the result.
     """
 
-    def __init__(self, image):
+    def __init__(self, image: str | np.ndarray):
         if isinstance(image, str):
             self.image = cv2.imread(image)
         elif isinstance(image, np.ndarray):
@@ -120,7 +120,7 @@ class CaptchaSolver:
             ),
         }
 
-    def save_training_data(self, image: np.ndarray, label) -> None:
+    def save_training_data(self, image: np.ndarray, label: int) -> None:
         """
         Saves a given image and the label in the ocr/trainingdata folder with
         the following name convention: "label_year-month-day_hour-minute-second.png"
@@ -134,7 +134,7 @@ class CaptchaSolver:
         print(f"saving {name}")
         cv2.imwrite(f"ocr/trainingdata/{name}", image)
 
-    def solve_captcha(self, save=False) -> int | None:
+    def solve_captcha(self, save: bool = False) -> int | None:
         """
         Solves the CAPTCHA and returns a dictionary containing the numbers on the left
         and right side of the equation, along with the calculated result.
