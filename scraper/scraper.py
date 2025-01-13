@@ -6,7 +6,6 @@ from PIL import Image
 import numpy as np
 import io
 from ocr import solver as s
-from time import sleep
 
 OBS_LOGIN_URL = "https://obs.ankara.edu.tr/Account/Login"
 
