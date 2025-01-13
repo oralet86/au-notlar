@@ -12,12 +12,9 @@ class OBSScraper:
     state: str = "init"
 
     def __init__(self):
-        browser = webdriver.Firefox()
-        browser.get(OBS_LOGIN_URL)
-        self.browser = browser
+        self.start()
 
-    def getGrades(self):
-        self.determineState()
+    def navigateSite(self):
         while True:
             match self.state:
                 case "init":
@@ -27,7 +24,10 @@ class OBSScraper:
                 case "examresults":
                     ...
                 case "other":
-                    ...
+                    print("Confused state. Quitting and restarting the browser.")
+                    self.quit()
+                    self.start()
+                    break
 
     def determineState(self): ...
 
@@ -52,6 +52,18 @@ class OBSScraper:
         self.browser.quit()
         self.browser = None
         self.state = "init"
+
+    def start(self):
+        browser = webdriver.Firefox()
+        browser.get(OBS_LOGIN_URL)
+        self.browser = browser
+
+
+class CaptchaScraper(OBSScraper):
+    def __init__(self):
+        super().__init__()
+
+    def getCaptchas(amount=100): ...
 
 
 if __name__ == "__main__":
