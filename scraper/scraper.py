@@ -19,10 +19,13 @@ class OBSScraper:
     browser: webdriver.Firefox = None
     state: Literal["init", "mainmenu", "form", "examresults", "other"] = "init"
 
-    def __init__(self):
+    def __init__(self, label: str, username: str, password: str):
+        self.label = label
+        self.username = username
+        self.password = password
         self.start()
 
-    def navigateSite(self):
+    def navigateSite(self) -> None:
         while True:
             match self.state:
                 case "init":
@@ -30,9 +33,9 @@ class OBSScraper:
                 case "form":
                     self.closeForm()
                 case "mainmenu":
-                    self.enterResults()
+                    self.enterResultsPage()
                 case "examresults":
-                    ...
+                    self.extractResults()
                 case "other":
                     print("Confused state. Quitting and restarting the browser.")
                     self.quit()
@@ -85,9 +88,9 @@ class OBSScraper:
     def attemptLogin(self):
         elements = self.getLoginElements()
         elements["username"].clear()
-        elements["username"].send_keys(".")
+        elements["username"].send_keys(self.username)
         elements["password"].clear()
-        elements["password"].send_keys(".")
+        elements["password"].send_keys(self.password)
         image = np.array(
             Image.open(io.BytesIO(elements["captcha_photo"].screenshot_as_png))
         )
@@ -126,7 +129,12 @@ class OBSScraper:
         form_button = self.browser.find_element(
             "xpath", "/html/body/div[16]/div[3]/div/button"
         )
-        self.wait.until(EC.element_to_be_clickable(form_button))
+        self.wait.until(
+            EC.element_to_be_clickable(
+                ("xpath", "/html/body/div[16]/div[3]/div/button")
+            )
+        )
+        self.wait.until(EC.invisibility_of_element(("xpath", "/html/body/div[1]")))
         form_button.click()
         self.wait.until(
             EC.invisibility_of_element(
@@ -134,7 +142,7 @@ class OBSScraper:
             )
         )
 
-    def enterResults(self):
+    def enterResultsPage(self):
         button_1 = self.browser.find_element(
             "xpath", "/html/body/div[8]/div[1]/ul/li[1]/a"
         )
@@ -147,7 +155,22 @@ class OBSScraper:
             "xpath", "/html/body/div[8]/div[1]/ul/li[1]/ul/li[2]/ul/li[4]/a"
         )
         button_3.click()
-        sleep(1)
+        self.wait.until(
+            EC.visibility_of_element_located(("xpath", '//*[@id="btnToggle"]'))
+        )
+
+    def extractResults(self):
+        open_all = self.browser.find_element("xpath", '//*[@id="btnToggle"]')
+        open_all.click()
+
+        lessons = self.browser.find_elements(
+            "css selector", "table.student-lesson-list"
+        )
+
+        for lesson in lessons:
+            lesson.find_elements(
+                "css selector",
+            )
 
     def quit(self):
         self.browser.quit()
@@ -172,12 +195,4 @@ class CaptchaScraper(OBSScraper):
 
 
 if __name__ == "__main__":
-    x = OBSScraper()
-    print(f"state should be init: {x.determineState()}")
-    while(x.determineState() == "init"):
-        x.attemptLogin()
-    print(f"state should be form: {x.determineState()}")
-    x.closeForm()
-    print(f"state should be main: {x.determineState()}")
-    x.enterResults()
-    print(f"state should be exam: {x.determineState()}")
+    ...
