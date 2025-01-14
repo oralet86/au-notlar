@@ -4,3 +4,4 @@ __pycache__
 testimages
 trainingdata
 accounts.json
+*.db
