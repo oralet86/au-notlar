@@ -16,7 +16,8 @@ class ScraperManager:
 
 class OBSScraper:
     browser: webdriver.Firefox = None
-    state: Literal["init", "mainmenu", "form", "examresults", "other"] = "init"
+    state: Literal["init", "mainmenu", "form", "examresults"] = "init"
+    results = None
 
     def __init__(self, label: str, username: str, password: str):
         self.label = label
@@ -26,23 +27,25 @@ class OBSScraper:
 
     def navigateSite(self) -> None:
         while True:
-            match self.state:
-                case "init":
-                    self.attemptLogin()
-                case "form":
-                    self.closeForm()
-                case "mainmenu":
-                    self.enterResultsPage()
-                case "examresults":
-                    self.extractResults()
-                case "other":
-                    print("Confused state. Quitting and restarting the browser.")
-                    self.quit()
-                    self.start()
+            self.determineState()
+            try:
+                match self.state:
+                    case "init":
+                        self.attemptLogin()
+                    case "form":
+                        self.closeForm()
+                    case "mainmenu":
+                        self.enterResultsPage()
+                    case "examresults":
+                        self.extractResults()
+                        return self.results
+            except Exception as e:
+                print(e)
+                self.browser.refresh()
 
     def determineState(
         self,
-    ) -> Literal["init", "mainmenu", "form", "examresults", "other"]:
+    ) -> Literal["init", "mainmenu", "form", "examresults"]:
         if self.isInLogin():
             self.state = "init"
         elif self.isInForm():
@@ -52,7 +55,7 @@ class OBSScraper:
         elif self.isInExamResults():
             self.state = "examresults"
         else:
-            self.state = "other"
+            raise Exception("Unknown state.")
         return self.state
 
     def isInLogin(self):
