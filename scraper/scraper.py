@@ -176,14 +176,54 @@ class OBSScraper:
         open_all = self.browser.find_element("xpath", '//*[@id="btnToggle"]')
         open_all.click()
 
-        lessons = self.browser.find_elements(
-            "css selector", "table.student-lesson-list"
+        lesson_table = self.browser.find_element(
+            "xpath", "/html/body/div[8]/div[4]/div[5]/form/table/tbody"
+        )
+        normal_tr_tags = lesson_table.find_elements(
+            "css selector", "#confirmationReport-list > tbody > tr:not(.sub-tr)"
+        )
+        subtr_tr_tags = lesson_table.find_elements(
+            "css selector", "#confirmationReport-list > tbody > tr.sub-tr"
         )
 
-        for lesson in lessons:
-            lesson.find_elements(
-                "css selector",
+        assert len(normal_tr_tags) == len(subtr_tr_tags)
+
+        for i in range(len(normal_tr_tags)):
+            lesson_information = {"name": None, "exams": []}
+            lesson_information["name"] = (
+                normal_tr_tags[i]
+                .find_element(
+                    "css selector",
+                    "#confirmationReport-list > tbody > tr > td:nth-child(1)",
+                )
+                .text
             )
+            try:
+                subtr_info = subtr_tr_tags[i].find_elements(
+                    "xpath",
+                    ".//td[2]/table/tbody/tr[count(*) > 1]",
+                )
+            except Exception:
+                subtr_info = []
+
+            for subtr in subtr_info:
+                lesson_information["exams"].append(
+                    {
+                        "name": subtr.find_element(
+                            "css selector", "td:nth-child(1)"
+                        ).text,
+                        "percentage": subtr.find_element(
+                            "css selector", "td:nth-child(3)"
+                        ).text,
+                        "date": subtr.find_element(
+                            "css selector", "td:nth-child(4)"
+                        ).text,
+                    }
+                )
+            # print(lesson_information)
+            results.append(lesson_information)
+
+        self.results = results
 
     def quit(self):
         self.browser.quit()
