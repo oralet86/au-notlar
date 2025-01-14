@@ -19,7 +19,6 @@ class OBSScraper:
         self.label = label
         self.username = username
         self.password = password
-        self.start()
 
     def navigateSite(self) -> None:
         while True:
