@@ -100,6 +100,9 @@ class OBSScraper:
         elements["login"].click()
 
     def getLoginElements(self):
+        self.wait.until(
+            EC.presence_of_element_located(("css selector", "#OtherUsername"))
+        )
         username_input = self.browser.find_element("css selector", "#OtherUsername")
         password_input = self.browser.find_element("css selector", "#OtherPassword")
         captcha_photo = self.browser.find_element(
@@ -117,6 +120,11 @@ class OBSScraper:
         }
 
     def closeForm(self):
+        self.wait.until(
+            EC.presence_of_element_located(
+                ("xpath", "/html/body/div[16]/div[3]/div/button")
+            )
+        )
         form_button = self.browser.find_element(
             "xpath", "/html/body/div[16]/div[3]/div/button"
         )
@@ -230,7 +238,7 @@ class OBSScraper:
         browser.get(OBS_LOGIN_URL)
         self.browser = browser
         self.wait = WebDriverWait(self.browser, 5)
-    
+
     def refresh(self):
         self.browser.refresh()
 
