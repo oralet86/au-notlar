@@ -5,3 +5,4 @@ testimages
 trainingdata
 accounts.json
 *.db
+*.log
