@@ -231,6 +231,9 @@ class OBSScraper:
         browser.get(OBS_LOGIN_URL)
         self.browser = browser
         self.wait = WebDriverWait(self.browser, 5)
+    
+    def refresh(self):
+        self.browser.refresh()
 
     def __del__(self):
         self.quit()
