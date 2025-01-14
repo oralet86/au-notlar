@@ -221,8 +221,9 @@ class OBSScraper:
         self.results = results
 
     def quit(self):
-        self.browser.quit()
-        self.browser = None
+        if self.browser is not None:
+            self.browser.quit()
+            self.browser = None
         self.state = "init"
 
     def start(self):
