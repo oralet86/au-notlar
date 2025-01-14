@@ -104,11 +104,6 @@ class OBSScraper:
         elements["captcha"].clear()
         elements["captcha"].send_keys(str(result))
         elements["login"].click()
-        self.wait.until(
-            EC.visibility_of_element_located(
-                ("xpath", "/html/body/div[16]/div[3]/div/button")
-            )
-        )
 
     def getLoginElements(self):
         username_input = self.browser.find_element("css selector", "#OtherUsername")
@@ -145,23 +140,39 @@ class OBSScraper:
         )
 
     def enterResultsPage(self):
+        self.wait.until(
+            EC.visibility_of_element_located(
+                ("xpath", "/html/body/div[8]/div[1]/ul/li[1]/a")
+            )
+        )
         button_1 = self.browser.find_element(
             "xpath", "/html/body/div[8]/div[1]/ul/li[1]/a"
         )
         button_1.click()
+        self.wait.until(
+            EC.visibility_of_element_located(
+                ("xpath", "/html/body/div[8]/div[1]/ul/li[1]/ul/li[2]/a")
+            )
+        )
         button_2 = self.browser.find_element(
             "xpath", "/html/body/div[8]/div[1]/ul/li[1]/ul/li[2]/a"
         )
         button_2.click()
+        self.wait.until(
+            EC.visibility_of_element_located(
+                ("xpath", "/html/body/div[8]/div[1]/ul/li[1]/ul/li[2]/ul/li[4]/a")
+            )
+        )
         button_3 = self.browser.find_element(
             "xpath", "/html/body/div[8]/div[1]/ul/li[1]/ul/li[2]/ul/li[4]/a"
         )
         button_3.click()
+
+    def extractResults(self):
         self.wait.until(
             EC.visibility_of_element_located(("xpath", '//*[@id="btnToggle"]'))
         )
-
-    def extractResults(self):
+        results = []
         open_all = self.browser.find_element("xpath", '//*[@id="btnToggle"]')
         open_all.click()
 
