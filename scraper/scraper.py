@@ -6,6 +6,7 @@ from PIL import Image
 import numpy as np
 import io
 from ocr import solver as s
+from logging_config import logger
 
 OBS_LOGIN_URL = "https://obs.ankara.edu.tr/Account/Login"
 
@@ -16,12 +17,14 @@ class OBSScraper:
     results = None
 
     def __init__(self, label: str, username: str, password: str):
+        logger.info(f"{label}: Initializing OBSScraper.")
         self.label = label
         self.username = username
         self.password = password
 
     def navigateSite(self) -> None:
         while True:
+            logger.info(f"{self.label}: Navigating site..")
             self.determineState()
             try:
                 match self.state:
@@ -34,12 +37,13 @@ class OBSScraper:
                     case "examresults":
                         return
             except Exception as e:
-                print(e)
+                logger.info(f"{self.label}: Exception while navigating site! {e}")
                 self.browser.refresh()
 
     def determineState(
         self,
     ) -> Literal["init", "mainmenu", "form", "examresults"]:
+        logger.info(f"{self.label}: Determining state.. ")
         if self.isInLogin():
             self.state = "init"
         elif self.isInForm():
@@ -82,6 +86,7 @@ class OBSScraper:
             return False
 
     def attemptLogin(self):
+        logger.info(f"{self.label}: Attempting to log in..")
         elements = self.getLoginElements()
         elements["username"].clear()
         elements["username"].send_keys(self.username)
@@ -100,6 +105,7 @@ class OBSScraper:
         elements["login"].click()
 
     def getLoginElements(self):
+        logger.info(f"{self.label}: Getting login elements..")
         self.wait.until(
             EC.presence_of_element_located(("css selector", "#OtherUsername"))
         )
@@ -120,6 +126,7 @@ class OBSScraper:
         }
 
     def closeForm(self):
+        logger.info(f"{self.label}: Closing form..")
         self.wait.until(
             EC.presence_of_element_located(
                 ("xpath", "/html/body/div[16]/div[3]/div/button")
@@ -142,6 +149,7 @@ class OBSScraper:
         )
 
     def enterResultsPage(self):
+        logger.info(f"{self.label}: Entering the exam results page..")
         self.wait.until(
             EC.visibility_of_element_located(
                 ("xpath", "/html/body/div[8]/div[1]/ul/li[1]/a")
@@ -171,6 +179,7 @@ class OBSScraper:
         button_3.click()
 
     def extractResults(self):
+        logger.info(f"{self.label}: Extracting exam results..")
         self.wait.until(
             EC.visibility_of_element_located(("xpath", '//*[@id="btnToggle"]'))
         )
@@ -228,12 +237,14 @@ class OBSScraper:
         self.results = results
 
     def quit(self):
+        logger.info(f"{self.label}: Quitting the scraper..")
         if self.browser is not None:
             self.browser.quit()
             self.browser = None
         self.state = "init"
 
     def start(self):
+        logger.info(f"{self.label}: Starting the scraper..")
         browser = webdriver.Firefox()
         browser.get(OBS_LOGIN_URL)
         self.browser = browser

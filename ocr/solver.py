@@ -4,6 +4,7 @@ from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 from PIL import Image
 import os
 from datetime import datetime
+from logging_config import logger
 
 
 class ModelSingleton:
@@ -18,6 +19,7 @@ class ModelSingleton:
 
     @classmethod
     def get_processor(cls):
+        logger.info("Processor requested!")
         if cls._processor is None:
             cls._processor = TrOCRProcessor.from_pretrained(
                 "microsoft/trocr-large-printed"
@@ -26,6 +28,7 @@ class ModelSingleton:
 
     @classmethod
     def get_model(cls):
+        logger.info("Model requested!")
         if cls._model is None:
             cls._model = VisionEncoderDecoderModel.from_pretrained(
                 "microsoft/trocr-large-printed"
@@ -41,6 +44,7 @@ class CaptchaSolver:
     """
 
     def __init__(self, image: str | np.ndarray):
+        logger.info("Initializing a CaptchaSolver object.")
         if isinstance(image, str):
             self.image = cv2.imread(image)
         elif isinstance(image, np.ndarray):
@@ -88,10 +92,12 @@ class CaptchaSolver:
         ].strip()
         try:
             result = int("".join(ch for ch in decoded if ch.isdigit()))
-        except ValueError:
-            result = -1
-        finally:
             return result
+        except ValueError:
+            logger.info(
+                f'Failure while extracting number from CAPTCHA! Expected an integer, got "{decoded}"'
+            )
+            raise ValueError
 
     def resolve(self, left_image: np.ndarray, right_image: np.ndarray) -> dict:
         """
@@ -131,7 +137,7 @@ class CaptchaSolver:
         """
         os.makedirs("ocr/trainingdata", exist_ok=True)
         name = f"{label}_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png"
-        print(f"saving {name}")
+        logger.info(f"Saving training data to {name}")
         cv2.imwrite(f"ocr/trainingdata/{name}", image)
 
     def solve_captcha(self, save: bool = False) -> int | None:
@@ -146,6 +152,7 @@ class CaptchaSolver:
         Returns:
             int | None: The result of the equation, if found, will be returned. If not, None will be returned.
         """
+        logger.info("Attempting to solve CAPTCHA..")
         positions = {"left": 5, "right": 45}
         dimensions = {"width": 25}
 
@@ -158,15 +165,19 @@ class CaptchaSolver:
 
         left_enhanced = self.enhance_legibility(left_image)
         right_enhanced = self.enhance_legibility(right_image)
-
-        result = self.resolve(left_enhanced, right_enhanced)
+        
+        try:
+            result = self.resolve(left_enhanced, right_enhanced)
+        except ValueError:
+            logger.info("Error while resolving CAPTCHA.")
+            return 0
 
         # Save the singular images as training data
         if save:
             self.save_training_data(left_enhanced, result["left"])
             self.save_training_data(right_enhanced, result["right"])
 
-        return result["sum"] if type(result["sum"]) is int else None
+        return result["sum"]
 
 
 if __name__ == "__main__":
