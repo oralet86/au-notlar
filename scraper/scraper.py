@@ -32,8 +32,7 @@ class OBSScraper:
                     case "mainmenu":
                         self.enterResultsPage()
                     case "examresults":
-                        self.extractResults()
-                        return self.results
+                        return
             except Exception as e:
                 print(e)
                 self.browser.refresh()
