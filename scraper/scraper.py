@@ -10,10 +10,6 @@ from ocr import solver as s
 OBS_LOGIN_URL = "https://obs.ankara.edu.tr/Account/Login"
 
 
-class ScraperManager:
-    instances = []
-
-
 class OBSScraper:
     browser: webdriver.Firefox = None
     state: Literal["init", "mainmenu", "form", "examresults"] = "init"
@@ -238,13 +234,6 @@ class OBSScraper:
 
     def __del__(self):
         self.quit()
-
-
-class CaptchaScraper(OBSScraper):
-    def __init__(self):
-        super().__init__()
-
-    def getCaptchas(amount=100): ...
 
 
 if __name__ == "__main__":
