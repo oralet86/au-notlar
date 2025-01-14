@@ -1,10 +1,12 @@
 import sqlite3
 import json
+from scraper.scraper import OBSScraper
 
 
 class Manager:
     _instance: "Manager" = None
     accounts: list[dict] = None
+    scrapers: list[OBSScraper] = []
     conn = sqlite3.connect("manager/notlar.db")
     cursor = conn.cursor()
 
@@ -14,12 +16,19 @@ class Manager:
         return cls._instance
 
     def __init__(self):
-        self.load_accounts()
+        self.loadAccounts()
 
-    def load_accounts(self):
+    def loadAccounts(self):
         with open("manager/accounts.json", "r", encoding="utf-8") as file:
             self.accounts = json.load(file)
 
+    def initializeScrapers(self):
+        for account in self.accounts:
+            self.scrapers.append(
+                OBSScraper(account["label"], account["username"], account["password"])
+            )
+
 
 if __name__ == "__main__":
-    Manager()
+    x = Manager()
+    print(x.accounts)
