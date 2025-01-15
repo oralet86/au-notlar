@@ -38,10 +38,10 @@ class ModelSingleton:
             )
             cls._model_loaded = True
         return cls._model
-    
+
     @classmethod
     def is_loaded(cls):
-        return (cls._processor_loaded and cls._model_loaded)
+        return cls._processor_loaded and cls._model_loaded
 
 
 class CaptchaSolver:
@@ -173,7 +173,7 @@ class CaptchaSolver:
 
         left_enhanced = self.enhance_legibility(left_image)
         right_enhanced = self.enhance_legibility(right_image)
-        
+
         try:
             result = self.resolve(left_enhanced, right_enhanced)
         except ValueError:
