@@ -13,7 +13,7 @@ OBS_LOGIN_URL = "https://obs.ankara.edu.tr/Account/Login"
 
 class OBSScraper:
     browser: webdriver.Firefox = None
-    state: Literal["init", "mainmenu", "form", "examresults"] = "init"
+    state: Literal["init", "mainmenu", "form", "examresults", "recaptcha"] = "init"
     results = None
 
     def __init__(self, label: str, username: str, password: str):
@@ -28,6 +28,13 @@ class OBSScraper:
             self.determineState()
             try:
                 match self.state:
+                    case "recaptcha":
+                        logger.info(
+                            "ReCAPTCHA detected. Shutting the browser down and rebooting."
+                        )
+                        self.stop()
+                        self.start()
+                        continue
                     case "init":
                         self.attemptLogin()
                     case "form":
@@ -42,8 +49,10 @@ class OBSScraper:
 
     def determineState(
         self,
-    ) -> Literal["init", "mainmenu", "form", "examresults"]:
+    ) -> Literal["init", "mainmenu", "form", "examresults", "recaptcha"]:
         logger.info(f"{self.label}: Determining state.. ")
+        if self.isReCaptcha():
+            self.state = "recaptcha"
         if self.isInLogin():
             self.state = "init"
         elif self.isInForm():
@@ -55,6 +64,13 @@ class OBSScraper:
         else:
             raise Exception("Unknown state.")
         return self.state
+
+    def isReCaptcha(self):
+        try:
+            self.browser.find_element("css selector", ".g-recaptcha")
+            return True
+        except Exception:
+            return False
 
     def isInLogin(self):
         try:
@@ -236,7 +252,7 @@ class OBSScraper:
 
         self.results = results
 
-    def quit(self):
+    def stop(self):
         logger.info(f"{self.label}: Quitting the scraper..")
         if self.browser is not None:
             self.browser.quit()
@@ -254,7 +270,7 @@ class OBSScraper:
         self.browser.refresh()
 
     def __del__(self):
-        self.quit()
+        self.stop()
 
 
 if __name__ == "__main__":
