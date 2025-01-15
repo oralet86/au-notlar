@@ -16,6 +16,8 @@ class ModelSingleton:
 
     _processor = None
     _model = None
+    _processor_loaded = False
+    _model_loaded = False
 
     @classmethod
     def get_processor(cls):
@@ -24,6 +26,7 @@ class ModelSingleton:
             cls._processor = TrOCRProcessor.from_pretrained(
                 "microsoft/trocr-large-printed"
             )
+            cls._processor_loaded = True
         return cls._processor
 
     @classmethod
@@ -33,7 +36,12 @@ class ModelSingleton:
             cls._model = VisionEncoderDecoderModel.from_pretrained(
                 "microsoft/trocr-large-printed"
             )
+            cls._model_loaded = True
         return cls._model
+    
+    @classmethod
+    def is_loaded(cls):
+        return (cls._processor_loaded and cls._model_loaded)
 
 
 class CaptchaSolver:
