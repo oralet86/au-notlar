@@ -29,7 +29,7 @@ class Manager:
 
     def loadAccounts(self):
         logger.info("Loading accounts.")
-        with open("manager/accounts.json", "r", encoding="utf-8") as file:
+        with open("accounts.json", "r", encoding="utf-8") as file:
             self.accounts = json.load(file)
 
     def initializeScrapers(self):
