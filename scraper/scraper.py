@@ -206,15 +206,26 @@ class OBSScraper:
         lesson_table = self.browser.find_element(
             "xpath", "/html/body/div[8]/div[4]/div[5]/form/table/tbody"
         )
+
+        # Get the necessary elements from the lesson table
         normal_tr_tags = lesson_table.find_elements(
             "css selector", "#confirmationReport-list > tbody > tr:not(.sub-tr)"
         )
         subtr_tr_tags = lesson_table.find_elements(
             "css selector", "#confirmationReport-list > tbody > tr.sub-tr"
         )
+        try:
+            surveys = lesson_table.find_elements("css selector", "a.noteview-survey")
+        except Exception:
+            surveys = []
 
-        assert len(normal_tr_tags) == len(subtr_tr_tags)
+        logger.info(
+            f"{self.label}: Survey amount: {len(surveys)}, <tr> amount: {len(normal_tr_tags)}, <tr.subtr> amount: {len(subtr_tr_tags)}"
+        )
+        assert len(normal_tr_tags) - len(surveys) == len(subtr_tr_tags)
 
+        # Go through each lecture and extract the available exam data
+        survey_count = 0
         for i in range(len(normal_tr_tags)):
             lesson_information = {"name": None, "exams": []}
             lesson_information["name"] = (
@@ -225,31 +236,61 @@ class OBSScraper:
                 )
                 .text
             )
+            is_surveyed = False
             try:
-                subtr_info = subtr_tr_tags[i].find_elements(
-                    "xpath",
-                    ".//td[2]/table/tbody/tr[count(*) > 1]",
+                surveys = normal_tr_tags[i].find_element(
+                    "css selector",
+                    "#confirmationReport-list > tbody > tr > td.textC > a.noteview-survey",
                 )
+                # If an element is found, that means there is a survey.
+                # Which means exam data must be extracted a different way.
+                is_surveyed = True
+                survey_count += 1
             except Exception:
-                subtr_info = []
-
-            for subtr in subtr_info:
+                # If no element is found, we can proceed as normal.
+                ...
+            # logger.info(f"Lesson Name: {lesson_information['name']}, Survey: {is_surveyed}, Survey Count: {survey_count}, i - survey_count = {i - survey_count}")
+            if is_surveyed:
                 lesson_information["exams"].append(
                     {
-                        "name": subtr.find_element(
-                            "css selector", "td:nth-child(1)"
-                        ).text,
-                        "percentage": subtr.find_element(
-                            "css selector", "td:nth-child(3)"
-                        ).text,
-                        "date": subtr.find_element(
-                            "css selector", "td:nth-child(4)"
-                        ).text,
+                        "name": "Harf Notu / Letter Grade",
+                        "percentage": "%100",
+                        "date": normal_tr_tags[i]
+                        .find_element(
+                            "css selector",
+                            "#confirmationReport-list > tbody > tr > td:nth-child(3)",
+                        )
+                        .text,
                     }
                 )
+            else:
+                try:
+                    subtr_info = subtr_tr_tags[i - survey_count].find_elements(
+                        "xpath",
+                        ".//td[2]/table/tbody/tr[count(*) > 1]",
+                    )
+                except Exception:
+                    logger.info(
+                        f"No exam info found for \"{lesson_information['name']}\""
+                    )
+                    subtr_info = []
+
+                for subtr in subtr_info:
+                    lesson_information["exams"].append(
+                        {
+                            "name": subtr.find_element(
+                                "css selector", "td:nth-child(1)"
+                            ).text,
+                            "percentage": subtr.find_element(
+                                "css selector", "td:nth-child(3)"
+                            ).text,
+                            "date": subtr.find_element(
+                                "css selector", "td:nth-child(4)"
+                            ).text,
+                        }
+                    )
             # print(lesson_information)
             results.append(lesson_information)
-
         self.results = results
 
     def stop(self):
