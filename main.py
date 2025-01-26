@@ -1,11 +1,5 @@
-import json
-from scraper.scraper import OBSScraper
+import manager.manager as m
 
-data = None
-
-with open("scraper/accounts.json", "r", encoding="utf-8") as f:
-    data = json.load(f)
-
-for dictionary in data:
-    x = OBSScraper(dictionary["label"], dictionary["username"], dictionary["password"])
-    x.navigateSite()
+if __name__ == "__main__":
+    manager_instance = m.Manager()
+    manager_instance.runScrapers()
