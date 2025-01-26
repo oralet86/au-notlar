@@ -6,9 +6,7 @@ from PIL import Image
 import numpy as np
 import io
 from ocr import solver as s
-from logging_config import logger
-
-OBS_LOGIN_URL = "https://obs.ankara.edu.tr/Account/Login"
+from global_variables import logger, OBS_LOGIN_URL
 
 
 class OBSScraper:

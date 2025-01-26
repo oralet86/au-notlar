@@ -20,3 +20,11 @@ logging.basicConfig(
 logger = logging.getLogger("main_logger")
 
 logger.info("Booting up.")
+
+OBS_LOGIN_URL = "https://obs.ankara.edu.tr/Account/Login"
+PROCESSOR_NAME = "microsoft/trocr-large-printed"
+MODEL_NAME = "microsoft/trocr-large-printed"
+TRAIN_DATA_FOLDER = "ocr/trainingdata"
+SQL_DATABASE_PATH = "results.db"
+ACCOUNTS_JSON_PATH = "accounts.json"
+INTERVAL = 300

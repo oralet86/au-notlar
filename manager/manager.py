@@ -2,7 +2,7 @@ import json
 import threading
 import time
 from scraper.scraper import OBSScraper
-from logging_config import logger
+from global_variables import logger, SQL_DATABASE_PATH, ACCOUNTS_JSON_PATH, INTERVAL
 import sqlite3
 
 
@@ -10,9 +10,9 @@ class Manager:
     _instance: "Manager" = None
     accounts: list[dict] = None
     scrapers: list[OBSScraper] = []
-    interval: int = 60
+    interval: int = INTERVAL
     lock = threading.Lock()
-    conn = sqlite3.connect("results.db", check_same_thread=False)
+    conn = sqlite3.connect(SQL_DATABASE_PATH, check_same_thread=False)
     cursor = conn.cursor()
 
     def __new__(cls):
@@ -29,7 +29,7 @@ class Manager:
 
     def loadAccounts(self):
         logger.info("Loading accounts.")
-        with open("accounts.json", "r", encoding="utf-8") as file:
+        with open(ACCOUNTS_JSON_PATH, "r", encoding="utf-8") as file:
             self.accounts = json.load(file)
 
     def initializeScrapers(self):

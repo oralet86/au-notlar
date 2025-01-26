@@ -4,7 +4,7 @@ from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 from PIL import Image
 import os
 from datetime import datetime
-from logging_config import logger
+from global_variables import logger, PROCESSOR_NAME, MODEL_NAME, TRAIN_DATA_FOLDER
 
 
 class ModelSingleton:
@@ -23,9 +23,7 @@ class ModelSingleton:
     def get_processor(cls):
         logger.info("Processor requested!")
         if cls._processor is None:
-            cls._processor = TrOCRProcessor.from_pretrained(
-                "microsoft/trocr-large-printed"
-            )
+            cls._processor = TrOCRProcessor.from_pretrained(PROCESSOR_NAME)
             cls._processor_loaded = True
         return cls._processor
 
@@ -33,9 +31,7 @@ class ModelSingleton:
     def get_model(cls):
         logger.info("Model requested!")
         if cls._model is None:
-            cls._model = VisionEncoderDecoderModel.from_pretrained(
-                "microsoft/trocr-large-printed"
-            )
+            cls._model = VisionEncoderDecoderModel.from_pretrained(MODEL_NAME)
             cls._model_loaded = True
         return cls._model
 
@@ -136,17 +132,18 @@ class CaptchaSolver:
 
     def save_training_data(self, image: np.ndarray, label: int) -> None:
         """
-        Saves a given image and the label in the ocr/trainingdata folder with
-        the following name convention: "label_year-month-day_hour-minute-second.png"
+        Saves a given image and the label in the folder specified in "TRAIN_DATA_FOLDER"
+        with the following name convention: "label_year-month-day_hour-minute-second.png"
 
         Args:
             image (np.ndarray): The image to be saved.
             label (int): The label extracted from the image.
         """
-        os.makedirs("ocr/trainingdata", exist_ok=True)
+        os.makedirs(TRAIN_DATA_FOLDER, exist_ok=True)
         name = f"{label}_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png"
-        logger.info(f"Saving training data to {name}")
-        cv2.imwrite(f"ocr/trainingdata/{name}", image)
+        data_path = f"{TRAIN_DATA_FOLDER}/{name}"
+        logger.info(f'Saving training data to "{data_path}"')
+        cv2.imwrite(data_path, image)
 
     def solve_captcha(self, save: bool = False) -> int | None:
         """
@@ -191,7 +188,7 @@ class CaptchaSolver:
 if __name__ == "__main__":
     for i in range(10):
         try:
-            solver = CaptchaSolver(f"ocr/testimages/captcha{i+1}.png")
+            solver = CaptchaSolver(f"{TRAIN_DATA_FOLDER}/captcha{i+1}.png")
             result = solver.solve_captcha()
             print(f"{i+1} result: {result}")
         except Exception as e:
