@@ -313,5 +313,23 @@ class Scraper:
         self.stop()
 
 
+class CaptchaScraper(Scraper):
+    def __init__(self, amount=100):
+        super().__init__("Captcha", None, None)
+        self.amount = amount
+
+    def extractCaptcha(self):
+        elements = self.getLoginElements()
+        captcha_image = self.getCaptchaImage(elements["captcha_photo"])
+        solver = s.CaptchaSolver(captcha_image)
+        return solver.solve_captcha(save=True)
+
+    def start(self):
+        super().start()
+        for _ in range(self.amount):
+            self.extractCaptcha()
+            self.refresh()
+
+
 if __name__ == "__main__":
     ...
