@@ -101,7 +101,7 @@ class CaptchaSolver:
             logger.info(
                 f'Failure while extracting number from CAPTCHA! Expected an integer, got "{decoded}"'
             )
-            raise ValueError
+            return -1
 
     def resolve(self, left_image: np.ndarray, right_image: np.ndarray) -> dict:
         """
