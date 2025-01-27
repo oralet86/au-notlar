@@ -186,11 +186,4 @@ class CaptchaSolver:
 
 
 if __name__ == "__main__":
-    for i in range(10):
-        try:
-            solver = CaptchaSolver(f"{TRAIN_DATA_FOLDER}/captcha{i+1}.png")
-            result = solver.solve_captcha()
-            print(f"{i+1} result: {result}")
-        except Exception as e:
-            print(f"Error: {e}")
-            continue
+    ...
