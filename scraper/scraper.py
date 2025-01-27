@@ -106,9 +106,7 @@ class Scraper:
         elements["username"].send_keys(self.username)
         elements["password"].clear()
         elements["password"].send_keys(self.password)
-        image = np.array(
-            Image.open(io.BytesIO(elements["captcha_photo"].screenshot_as_png))
-        )
+        image = self.getCaptchaImage(elements["captcha_photo"])
         solver = s.CaptchaSolver(image)
         result = solver.solve_captcha()
         if result is None:
@@ -117,6 +115,9 @@ class Scraper:
         elements["captcha"].clear()
         elements["captcha"].send_keys(str(result))
         elements["login"].click()
+
+    def getCaptchaImage(self, captcha_photo):
+        return np.array(Image.open(io.BytesIO(captcha_photo.screenshot_as_png)))
 
     def getLoginElements(self):
         logger.info(f"{self.label}: Getting login elements..")
