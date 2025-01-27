@@ -1,7 +1,7 @@
 import json
 import threading
 import time
-from scraper.scraper import OBSScraper
+from scraper.scraper import Scraper
 from global_variables import logger, SQL_DATABASE_PATH, ACCOUNTS_JSON_PATH, INTERVAL
 import sqlite3
 
@@ -9,7 +9,7 @@ import sqlite3
 class Manager:
     _instance: "Manager" = None
     accounts: list[dict] = None
-    scrapers: list[OBSScraper] = []
+    scrapers: list[Scraper] = []
     interval: int = INTERVAL
     lock = threading.Lock()
     conn = sqlite3.connect(SQL_DATABASE_PATH, check_same_thread=False)
@@ -36,7 +36,7 @@ class Manager:
         logger.info("Initializing scrapers.")
         for account in self.accounts:
             self.scrapers.append(
-                OBSScraper(account["label"], account["username"], account["password"])
+                Scraper(account["label"], account["username"], account["password"])
             )
 
     def startScrapers(self):

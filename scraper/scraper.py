@@ -9,13 +9,13 @@ from ocr import solver as s
 from global_variables import logger, OBS_LOGIN_URL
 
 
-class OBSScraper:
+class Scraper:
     browser: webdriver.Firefox = None
     state: Literal["init", "mainmenu", "form", "examresults", "recaptcha"] = "init"
     results = None
 
     def __init__(self, label: str, username: str, password: str):
-        logger.info(f"{label}: Initializing OBSScraper.")
+        logger.info(f"{label}: Initializing Scraper.")
         self.label = label
         self.username = username
         self.password = password
