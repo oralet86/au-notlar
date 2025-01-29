@@ -1,8 +1,6 @@
 .venv
 .vscode
 __pycache__
-testimages
-trainingdata
 accounts.json
 *.db
 *.log
