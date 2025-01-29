@@ -42,7 +42,7 @@ class Scraper:
                     case "examresults":
                         return
             except Exception as e:
-                logger.info(f"{self.label}: Exception while navigating site! {e}")
+                logger.exception(f"{self.label}: Exception while navigating site! {e}")
                 self.browser.refresh()
 
     def determineState(
@@ -122,7 +122,7 @@ class Scraper:
     def getLoginElements(self):
         logger.info(f"{self.label}: Getting login elements..")
         self.wait.until(
-            (EC.visibility_of_element_located(("css selector", "#btnSend")))
+            (EC.element_to_be_clickable(("css selector", "#btnSend")))
             and (EC.invisibility_of_element_located(("css selector", ".page_spinner")))
         )
         username_input = self.browser.find_element("css selector", "#OtherUsername")
