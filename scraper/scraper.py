@@ -15,14 +15,14 @@ class Scraper:
     results = None
 
     def __init__(self, label: str, username: str, password: str):
-        logger.info(f"{label}: Initializing Scraper.")
+        logger.info("Initializing Scraper.")
         self.label = label
         self.username = username
         self.password = password
 
     def navigateSite(self) -> None:
         while True:
-            logger.info(f"{self.label}: Navigating site..")
+            logger.info("Navigating site..")
             self.determineState()
             try:
                 match self.state:
@@ -42,13 +42,13 @@ class Scraper:
                     case "examresults":
                         return
             except Exception as e:
-                logger.exception(f"{self.label}: Exception while navigating site! {e}")
+                logger.exception(e)
                 self.browser.refresh()
 
     def determineState(
         self,
     ) -> Literal["init", "mainmenu", "form", "examresults", "recaptcha"]:
-        logger.info(f"{self.label}: Determining state.. ")
+        logger.info("Determining state.. ")
         if self.isReCaptcha():
             self.state = "recaptcha"
         if self.isInLogin():
@@ -100,7 +100,7 @@ class Scraper:
             return False
 
     def attemptLogin(self):
-        logger.info(f"{self.label}: Attempting to log in..")
+        logger.info("Attempting to log in..")
         elements = self.getLoginElements()
         elements["username"].clear()
         elements["username"].send_keys(self.username)
@@ -120,7 +120,7 @@ class Scraper:
         return np.array(Image.open(io.BytesIO(captcha_photo.screenshot_as_png)))
 
     def getLoginElements(self):
-        logger.info(f"{self.label}: Getting login elements..")
+        logger.info("Getting login elements..")
         self.wait.until(
             (EC.element_to_be_clickable(("css selector", "#btnSend")))
             and (EC.invisibility_of_element_located(("css selector", ".page_spinner")))
@@ -142,7 +142,7 @@ class Scraper:
         }
 
     def closeForm(self):
-        logger.info(f"{self.label}: Closing form..")
+        logger.info("Closing form..")
         self.wait.until(
             EC.presence_of_element_located(
                 ("xpath", "/html/body/div[16]/div[3]/div/button")
@@ -165,7 +165,7 @@ class Scraper:
         )
 
     def enterResultsPage(self):
-        logger.info(f"{self.label}: Entering the exam results page..")
+        logger.info("Entering the exam results page..")
         self.wait.until(
             EC.visibility_of_element_located(
                 ("xpath", "/html/body/div[8]/div[1]/ul/li[1]/a")
@@ -195,7 +195,7 @@ class Scraper:
         button_3.click()
 
     def extractResults(self):
-        logger.info(f"{self.label}: Extracting exam results..")
+        logger.info("Extracting exam results..")
         self.wait.until(
             EC.visibility_of_element_located(("xpath", '//*[@id="btnToggle"]'))
         )
@@ -220,7 +220,7 @@ class Scraper:
             surveys = []
 
         logger.info(
-            f"{self.label}: Survey amount: {len(surveys)}, <tr> amount: {len(normal_tr_tags)}, <tr.subtr> amount: {len(subtr_tr_tags)}"
+            f"Survey amount: {len(surveys)}, <tr> amount: {len(normal_tr_tags)}, <tr.subtr> amount: {len(subtr_tr_tags)}"
         )
         assert len(normal_tr_tags) - len(surveys) == len(subtr_tr_tags)
 
@@ -294,14 +294,14 @@ class Scraper:
         self.results = results
 
     def stop(self):
-        logger.info(f"{self.label}: Quitting the scraper..")
+        logger.info("Quitting the scraper..")
         if self.browser is not None:
             self.browser.quit()
             self.browser = None
         self.state = "init"
 
     def start(self):
-        logger.info(f"{self.label}: Starting the scraper..")
+        logger.info("Starting the scraper..")
         browser = webdriver.Firefox()
         browser.get(OBS_LOGIN_URL)
         self.browser = browser
