@@ -122,7 +122,8 @@ class Scraper:
     def getLoginElements(self):
         logger.info(f"{self.label}: Getting login elements..")
         self.wait.until(
-            EC.presence_of_element_located(("css selector", "#OtherUsername"))
+            (EC.visibility_of_element_located(("css selector", "#btnSend")))
+            and (EC.invisibility_of_element_located(("css selector", ".page_spinner")))
         )
         username_input = self.browser.find_element("css selector", "#OtherUsername")
         password_input = self.browser.find_element("css selector", "#OtherPassword")
@@ -304,7 +305,7 @@ class Scraper:
         browser = webdriver.Firefox()
         browser.get(OBS_LOGIN_URL)
         self.browser = browser
-        self.wait = WebDriverWait(self.browser, 5)
+        self.wait = WebDriverWait(driver=self.browser, timeout=10, poll_frequency=1)
 
     def refresh(self):
         self.browser.refresh()
