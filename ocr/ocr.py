@@ -5,7 +5,7 @@ import numpy as np
 from torch.utils.data import Dataset
 import os
 
-_MODEL = None
+MODEL: "OCRModel" = None
 
 
 class OCRModel(torch.nn.Module):
@@ -36,14 +36,15 @@ transform = transforms.Compose(
 
 
 def load_model():
-    _MODEL = OCRModel()
-    _MODEL.load_state_dict(torch.load("ocr_model.pth", weights_only=True))
-    _MODEL.eval()
+    global MODEL
+    MODEL = torch.load("ocr_model.pth", weights_only=False)
+    MODEL.eval()
 
 
 def predict(image: np.ndarray):
+    global MODEL
     # If the model is not loaded, load it
-    if _MODEL is None:
+    if MODEL is None:
         load_model()
     # Load and preprocess the image
     image = Image.fromarray(image).convert("L")  # Convert to grayscale
@@ -51,7 +52,7 @@ def predict(image: np.ndarray):
 
     # Run the model on the image
     with torch.no_grad():
-        outputs = _MODEL(image)
+        outputs = MODEL(image)
         _, predicted_label = torch.max(outputs, 1)  # Get the index of the highest score
 
     return predicted_label.item()
