@@ -1,5 +1,5 @@
-import manager.manager as m
+from manager.manager import Manager
 
 if __name__ == "__main__":
-    manager_instance = m.Manager()
-    manager_instance.runScrapers()
+    x = Manager()
+    x.start()
