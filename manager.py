@@ -1,7 +1,7 @@
 import json
 import threading
 import time
-from scraper.scraper import Scraper
+from scraper import Scraper
 from global_variables import logger, SQL_DATABASE_PATH, ACCOUNTS_JSON_PATH, INTERVAL
 import sqlite3
 from functools import partial
