@@ -1,32 +1,17 @@
 import logging
 import time
 import os
-from typing import Literal
+from os import getenv
 
-# Dont change this unless the login page has been changed
-OBS_LOGIN_URL = "https://obs.ankara.edu.tr/Account/Login"
-
-# Where training data is located
-TRAIN_DATA_FOLDER = "ocr/trainingdata/"
-
-# Where test data is located
-TEST_DATA_FOLDER = "ocr/testdata/"
-
-# Path to the SQL database
-SQL_DATABASE_PATH = "results.db"
-
-# Path to the json file containing account information
-ACCOUNTS_JSON_PATH = "accounts.json"
-
-# How often should the scrapers refresh the page
-INTERVAL = 300
-
-# Path the logs will be saved
-LOG_DIR = "logs"
-
-# Log mode, "file" if you want to log to a file, "terminal" for logging to console,
-# "both" for both saving logs to a file and printing to console. Default is file
-LOG_MODE: Literal["file", "terminal", "both"] = "file"
+OBS_LOGIN_URL = getenv("OBS_LOGIN_URL")
+TRAIN_DATA_FOLDER = getenv("TRAIN_DATA_FOLDER")
+TEST_DATA_FOLDER = getenv("TEST_DATA_FOLDER")
+SQL_DATABASE_PATH = getenv("SQL_DATABASE_PATH")
+ACCOUNTS_JSON_PATH = getenv("ACCOUNTS_JSON_PATH")
+INTERVAL = int(getenv("INTERVAL"))
+LOG_DIR = getenv("LOG_DIR")
+LOG_MODE = getenv("LOG_MODE")
+BOT_TOKEN = getenv("BOT_TOKEN")
 
 execution_time = time.strftime("%Y-%m-%d_%H-%M-%S")
 log_formatter = logging.Formatter(
