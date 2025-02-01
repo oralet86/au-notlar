@@ -2,6 +2,9 @@ import logging
 import time
 import os
 from os import getenv
+from dotenv import load_dotenv
+
+load_dotenv()
 
 OBS_LOGIN_URL = getenv("OBS_LOGIN_URL")
 TRAIN_DATA_FOLDER = getenv("TRAIN_DATA_FOLDER")
