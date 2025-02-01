@@ -75,7 +75,8 @@ class Manager(object):
 
         self._ready = True
 
-    def initializeDatabase(self):
+    @staticmethod
+    def initializeDatabase():
         conn = sqlite3.connect(SQL_DATABASE_PATH)
         cursor = conn.cursor()
         cursor.execute(
@@ -122,7 +123,8 @@ class Manager(object):
         cursor.close()
         conn.close()
 
-    def upsert_data(self, department_name, lecture_data):
+    @staticmethod
+    def upsert_data(department_name, lecture_data):
         conn = sqlite3.connect(SQL_DATABASE_PATH)
         cursor = conn.cursor()
         # Ensure department exists
