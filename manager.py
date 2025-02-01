@@ -197,6 +197,158 @@ class Manager(object):
         cursor.close()
         conn.close()
 
+    @staticmethod
+    def get_departments():
+        logger.info("Retrieving department information.")
+        conn = sqlite3.connect(SQL_DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name FROM Departments")
+        dept_info = cursor.fetchall()
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return dept_info
+
+    @staticmethod
+    def get_department_name(dept_id: str):
+        logger.info(
+            f'Retrieving department name from department with id: "{dept_id}" .'
+        )
+        conn = sqlite3.connect(SQL_DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM Departments WHERE id = ?", dept_id)
+        dept_info = cursor.fetchone()
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return dept_info[0]
+
+    @staticmethod
+    def get_lectures(dept_id: str):
+        logger.info(
+            f'Retrieving lecture information from department with id: "{dept_id}" .'
+        )
+        conn = sqlite3.connect(SQL_DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name FROM Lectures WHERE department_id = ?", dept_id)
+        dept_info = cursor.fetchall()
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return dept_info
+
+    @staticmethod
+    def add_lecture_notification(lecture_id: str, user_id: str) -> bool:
+        logger.info(f'Adding user notification to lecture with id: "{lecture_id}".')
+        try:
+            conn = sqlite3.connect(SQL_DATABASE_PATH)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT id FROM Notifications WHERE lecture_id = ? AND user_id = ?",
+                (lecture_id, user_id),
+            )
+            department_row = cursor.fetchone()
+            if department_row is None:
+                cursor.execute(
+                    "INSERT INTO Notifications (lecture_id, user_id) VALUES (?, ?)",
+                    (
+                        str(lecture_id),
+                        str(user_id),
+                    ),
+                )
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return True
+        except Exception as e:
+            logger.exception(
+                f'Exception while adding user notification to lecture with id: "{lecture_id}", {e}'
+            )
+            return False
+
+    @staticmethod
+    def delete_lecture_notification(lecture_id: str, user_id: str) -> bool:
+        logger.info(f'Deleting user notification to lecture with id: "{lecture_id}".')
+        try:
+            conn = sqlite3.connect(SQL_DATABASE_PATH)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT id FROM Notifications WHERE lecture_id = ? AND user_id = ?",
+                (lecture_id, user_id),
+            )
+            department_row = cursor.fetchone()
+            if department_row is not None:
+                cursor.execute(
+                    "DELETE FROM Notifications WHERE lecture_id = ? AND user_id = ?",
+                    (
+                        str(lecture_id),
+                        str(user_id),
+                    ),
+                )
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return True
+        except Exception as e:
+            logger.exception(
+                f'Exception while deleting user notification to lecture with id: "{lecture_id}", {e}'
+            )
+            return False
+
+    @staticmethod
+    def get_lecture_users(lecture_id: str) -> list[str]:
+        logger.info(f'Getting user notifications from lecture with id: "{lecture_id}".')
+        conn = sqlite3.connect(SQL_DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT user_id FROM Notifications WHERE lecture_id = ?", (str(lecture_id),)
+        )
+        user_ids = [x[0] for x in cursor.fetchall()]
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return user_ids
+
+    @staticmethod
+    def get_user_notifications(user_id: str) -> list[str]:
+        logger.info(f'Getting user notifications from user with id: "{user_id}".')
+        conn = sqlite3.connect(SQL_DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT lecture_id FROM Notifications WHERE user_id = ?",
+            (str(user_id),),
+        )
+        lecture_info = [x[0] for x in cursor.fetchall()]
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return lecture_info
+
+    @staticmethod
+    def does_user_follow_lecture(lecture_id: str, user_id: str) -> bool:
+        conn = sqlite3.connect(SQL_DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT id FROM Notifications WHERE lecture_id = ? AND user_id = ?",
+            (str(lecture_id), str(user_id)),
+        )
+        return_bool = cursor.fetchone() is not None
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return return_bool
+
+    @staticmethod
+    def get_lecture_name(lecture_id: str) -> str:
+        conn = sqlite3.connect(SQL_DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM Lectures WHERE id = ?", (str(lecture_id),))
+        lecture_name = cursor.fetchone()
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return lecture_name[0]
+
 
 if __name__ == "__main__":
-    x = Manager()
+    ...
