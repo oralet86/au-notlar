@@ -112,9 +112,9 @@ class Manager(object):
             """
         CREATE TABLE IF NOT EXISTS Notifications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            department_id INTEGER NOT NULL,
-            nickname TEXT NOT NULL,
-            FOREIGN KEY (department_id) REFERENCES Departments(id)
+            lecture_id INTEGER NOT NULL,
+            user_id TEXT NOT NULL,
+            FOREIGN KEY (lecture_id) REFERENCES Lectures(id)
         )"""
         )
 
