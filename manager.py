@@ -5,6 +5,7 @@ from scraper import Scraper
 from global_variables import logger, SQL_DATABASE_PATH, ACCOUNTS_JSON_PATH, INTERVAL
 import sqlite3
 from functools import partial
+import telegram
 
 
 class Manager(object):
@@ -169,26 +170,32 @@ def upsert_data(department_name, lecture_data):
             )
             exam_row = cursor.fetchone()
 
-                if exam_row is None:
-                    # If none were found, that means new exam results were entered
-                    cursor.execute(
-                        "DELETE FROM Exams WHERE lecture_id = ? AND name = ?",
-                        (lecture_id, exam["name"]),
-                    )
-                    cursor.execute(
-                        """
-                        INSERT INTO Exams (lecture_id, name, percentage, date)
-                        VALUES (?, ?, ?, ?)
-                    """,
-                        (lecture_id, exam["name"], exam["percentage"], exam["date"]),
-                    )
-                    logger.info(
-                        f'New exam results found for "{lecture["name"]} / {exam["name"]}". Overwriting old ones.'
-                    )
-                else:
-                    ...
-                    # This line cluttered up the logs too much.
-                    # logger.info(f'Exam results of "{lecture["name"]} / {exam["name"]}" match the ones at the tables.')
+            if exam_row is None:
+                logger.info(
+                    f'New exam results found for "{lecture["name"]} / {exam["name"]}". Overwriting old ones and sending notifications.'
+                )
+                # If none were found, that means new exam results were entered
+                cursor.execute(
+                    "DELETE FROM Exams WHERE lecture_id = ? AND name = ?",
+                    (lecture_id, exam["name"]),
+                )
+                cursor.execute(
+                    """
+                    INSERT INTO Exams (lecture_id, name, percentage, date)
+                    VALUES (?, ?, ?, ?)
+                """,
+                    (lecture_id, exam["name"], exam["percentage"], exam["date"]),
+                )
+                user_ids = get_lecture_users(lecture_id=lecture_id)
+                telegram.send_mass_notifications(
+                    user_ids=user_ids,
+                    lecture_name=lecture["name"],
+                    exam_name=exam["name"],
+                )
+            else:
+                ...
+                # This line cluttered up the logs too much.
+                # logger.info(f'Exam results of "{lecture["name"]} / {exam["name"]}" match the ones at the tables.')
 
     logger.info("Finished database update.")
     conn.commit()
